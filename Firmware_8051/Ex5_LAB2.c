@@ -9,6 +9,10 @@ sbit RW=P0^1;
 sbit SPK  = P3^7;	// speaker pin
 char uart_data, button;
 unsigned char note_index;
+int i;
+
+// Bai hat Happy New Year
+unsigned int hpny[]={18,20,18,14,12,12,14,18,22,4,2,46,46,46,4,50,50,50,46,22,4,46,46,50,50,22,22,20,22};  //29 phan tu
 
 //verify this table according to your CPU clock
 code unsigned int note_table[]={
@@ -84,6 +88,7 @@ void main()
 	Init_System();
 	LCD_init();
 	music_player_init();
+	delay(50000);
 	LCD_Write_String(" Electric Piano");
 	LCD_Send_Command(0xC0); //Chuyen con tro xuong dong thu 2
 	SCON = 0x50; 			// uart in mode 1 (8 bit), REN=1
@@ -93,6 +98,20 @@ void main()
   ES = 1; 				// Enable serial interrupt
   EA = 1; 				// Enable global interrupt
   TR1 = 1; 				// Timer 1 run 
+	
+	// Phat nhac bai Happy New Year
+	for(i=0;i<29;i++){
+		note_index = hpny[i];
+		TH0=note_table[note_index];
+		TL0=note_table[note_index+1];			
+		TR0=1;
+		delay(30000);
+		TR0=0;
+		delay(500);
+		SPK=1;
+	}
+	
+	// Vong lap de nhan dieu khien tu PC va phat am thanh tuong ung
   while(1){
 		if(button == 1) {
 			music_node();
@@ -169,7 +188,7 @@ void delay(unsigned int time)
 	while(time--);
 }
 
-
+// Nhan du lieu tu cong COM
 void serial_IT(void) interrupt 4
 {
   if (RI == 1)
@@ -194,7 +213,7 @@ void serial_IT(void) interrupt 4
     TI = 0; 			// if emission occur 
 }
 
-
+// Tao am thanh
 void timer0() interrupt 1
 {
 	TH0=note_table[note_index];
