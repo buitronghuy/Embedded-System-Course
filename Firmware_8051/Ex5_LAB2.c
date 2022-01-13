@@ -7,7 +7,7 @@ sbit EN=P0^2;
 sbit RS=P0^0;
 sbit RW=P0^1;
 sbit SPK  = P3^7;	// speaker pin
-char uart_data, button;
+char uart_data;
 unsigned char note_index;
 int i;
 
@@ -93,11 +93,11 @@ void main()
 	LCD_Send_Command(0xC0); //Chuyen con tro xuong dong thu 2
 	SCON = 0x50; 			// uart in mode 1 (8 bit), REN=1
 	TMOD = 0x21 ; 	// Timer 1 in mode 2, timer 0 in mode 1
-  TH1 = 0xFD; 			// 9600 Bds at 11.0592MHz 
-  TL1 = 0xFD; 			// 9600 Bds at 11.0592MHz 
-  ES = 1; 				// Enable serial interrupt
-  EA = 1; 				// Enable global interrupt
-  TR1 = 1; 				// Timer 1 run 
+  	TH1 = 0xFD; 			// 9600 Bds at 11.0592MHz 
+  	TL1 = 0xFD; 			// 9600 Bds at 11.0592MHz 
+  	ES = 1; 				// Enable serial interrupt
+  	EA = 1; 				// Enable global interrupt
+  	TR1 = 1; 				// Timer 1 run 
 	
 	// Phat nhac bai Happy New Year
 	for(i=0;i<29;i++){
@@ -111,13 +111,8 @@ void main()
 		SPK=1;
 	}
 	
-	// Vong lap de nhan dieu khien tu PC va phat am thanh tuong ung
-  while(1){
-		if(button == 1) {
-			music_node();
-			button = 0;
-		}
-	}	
+	// Vong lap de chay chuong trinh
+  	while(1){}
 }
 void Init_System()
 {
@@ -176,10 +171,10 @@ void music_player_init()
 
 // Phat am thanh note nhac da duoc chon
 void music_node() {
-			TH0=note_table[note_index];
-			TL0=note_table[note_index+1];			
-			TR0=1;
-			SPK=1;
+	TH0=note_table[note_index];
+	TL0=note_table[note_index+1];			
+	TR0=1;
+	SPK=1;
 }
 
 
@@ -191,15 +186,15 @@ void delay(unsigned int time)
 // Nhan du lieu tu cong COM
 void serial_IT(void) interrupt 4
 {
-  if (RI == 1)
-  { 
-    RI = 0; 			// prepare for next reception 
-    uart_data = SBUF; 	// Du lieu nhan duoc
+  	if (RI == 1)
+  	{ 
+    		RI = 0; 			// prepare for next reception 
+    		uart_data = SBUF; 	// Du lieu nhan duoc
 		
 		//cac phim tu a-z duoc nhan
 		if(uart_data>96 && uart_data<123) {
 			note_index = (uart_data-97) * 2;
-			button = 1;			// thong bao phim hop le da duoc bam
+			music_node();		// phat am thanh
 			LCD_Write_One_Char(key[note_index]);		// Ghi ten not nhac len LCD
 			LCD_Write_One_Char(key[note_index+1]);	// Ghi ten not nhac len LCD
 			LCD_Send_Command(0xC0); //Chuyen con tro xuong dong thu 2
@@ -208,9 +203,8 @@ void serial_IT(void) interrupt 4
 		else {
 			TR0=0;	// ngat am thanh hien tai
 		}
-  }
-  else 
-    TI = 0; 			// if emission occur 
+	}
+  	else TI = 0; 			// if emission occur 
 }
 
 // Tao am thanh
